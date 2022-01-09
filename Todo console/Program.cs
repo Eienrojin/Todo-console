@@ -1,33 +1,16 @@
-﻿int listLength = 1;
-int numberOfStroke = 0;
-List list_1 = new List();
-list_1._list = new string[1];
+﻿string[] taskList = new string[1];
 
 //Каталог для записи файла настроек
-string path = @"C:\Prog and games\НА ноут\Тестовая папка";
+string path = @"C:\Users\Bugurt\source\repos\Todo-console\Todo console";
 
 DirectoryInfo dirInf = new DirectoryInfo(path);
 
 if (!dirInf.Exists)
     dirInf.Create();
 
-const string TEMPFILE = "ЗАМЕНИТЬ ФАЙЛ";
 //Конец создания файла
 
-//Запись файла
-using (FileStream fstream = new FileStream($"{path}\note.txt", FileMode.OpenOrCreate))
-{
-    byte[] savingArray = System.Text.Encoding.Default.GetBytes(TEMPFILE); //заменить темп файл на нужные
-    await fstream.WriteAsync(savingArray, 0, savingArray.Length);
-    Console.WriteLine("Сохранено!");
-}
-
-//Чтение файла
-using (FileStream fstream = File.OpenRead($"{path}\note.txt"));
-{
-    byte readingArray = new byte[FileStream.]
-}
-
+ReadProgram();
 MainMenu();
 
 void MainMenu()
@@ -38,7 +21,8 @@ void MainMenu()
         Console.WriteLine("Что вы хотите сделать?"
             + "\n1. Ввести задачу"
             + "\n2. Отобразить задачи"
-            + "\n3. Выйти");
+            + "\n3. Сохраниться"
+            + "\n4. Выйти");
 
         switch (Console.ReadLine())
         {
@@ -55,11 +39,15 @@ void MainMenu()
 
             case "2":
                 Console.Clear();
-                list_1.ShowList();
+                ShowList(taskList);
                 InitChoiseMenu();
                 break;
 
             case "3":
+                SaveProgram();
+                break;
+
+            case "4":
                 Environment.Exit(0);
                 break;
         }
@@ -82,12 +70,12 @@ void InitChoiseMenu()
                 break;
 
             case "1":
-                ArrayException(list_1._list);
+                ArrayException(taskList);
                 DeleteTask();
                 break;
 
             case "2":
-                ArrayException(list_1._list);
+                ArrayException(taskList);
                 SearchTask();
                 break;
 
@@ -100,10 +88,12 @@ void InitChoiseMenu()
 
 void InitTask(string task)
 {
+    int listLength = taskList.Length + 1;
+    int numberOfStroke = taskList.Length;
     task = task.Trim();
 
-    Array.Resize(ref list_1._list, listLength);
-    list_1._list[numberOfStroke] = task;
+    Array.Resize(ref taskList, listLength);
+    taskList[numberOfStroke] = task;
     listLength++;
     numberOfStroke++;
 
@@ -114,24 +104,24 @@ void DeleteTask()
 {
     int choice;
     Console.WriteLine("Введите номер записи, которую хотите удалить. Если хотите вернуться, введите -1");
-    choice = int.Parse(Console.ReadLine());
+    choice = int.Parse(Console.ReadLine()) - 1;
 
     if (choice == -1)
         MainMenu();
 
     ChoiceException(choice);
 
-    list_1._list[choice] = "";
+    taskList[choice] = "";
 
-    for (int i = 0; i < list_1._list.Length; i++)
+    for (int i = 0; i < taskList.Length; i++)
     {
-        if (list_1._list[i] == "")
+        if (taskList[i] == "")
         {
-            Array.Sort(list_1._list);
+            Array.Sort(taskList);
         }
     }
 
-    list_1.ShowList();
+    ShowList(taskList);
 }
 
 void SearchTask()
@@ -142,7 +132,7 @@ void SearchTask()
     byte countOfSearched = 0;
     string initSearch = Console.ReadLine();
     bool searched = false;
-    string[] tempList = new string[list_1._list.Length];
+    string[] tempList = new string[taskList.Length];
 
     if (initSearch == "-1")
         MainMenu();
@@ -152,18 +142,18 @@ void SearchTask()
     initSearch = initSearch.Trim();
     initSearch = initSearch.ToLower();
 
-    for (int i = 0; i < list_1._list.Length; i++)
+    for (int i = 0; i < taskList.Length; i++)
     {
-        tempList[i] = list_1._list[i].ToLower();
+        tempList[i] = taskList[i].ToLower();
     }
 
-    for (int i = 0; i < list_1._list.Length; i++)
+    for (int i = 0; i < taskList.Length; i++)
     {
         if (tempList[i].Contains(initSearch))
         {
             countOfSearched++;
             searched = true;
-            Console.WriteLine($"{i + 1}. {list_1._list[i]}");
+            Console.WriteLine($"{i + 1}. {taskList[i]}");
         }
     }
     countOfSearched = 0;
@@ -176,7 +166,7 @@ void SearchTask()
 //Обработчики ошибок
 void ChoiceException(int choice)
 {
-    if (choice > list_1._list.Length || choice <= 0)
+    if (choice > taskList.Length || choice <= 0)
     {
         Console.WriteLine("Кажется, вы допустили ошибку. Попробуйте еще раз");
         DeleteTask();
@@ -204,25 +194,37 @@ void ArrayException(string[] Array)
 }
 //Конец обработчиков
 
-class List
+//Запись файла
+async void SaveProgram()
 {
-    public string[] _list;
-
-    public void ShowList()
     {
-        for (int j = 0; j < 10; j++)
-        {
-            Console.Write("_");
-        }
-        Console.WriteLine();
-
-        for (int i = 0; i < _list.Length; i++)
-            Console.WriteLine($"{i + 1}. {_list[i]}");
-
-        for (int j = 0; j < 10; j++)
-        {
-            Console.Write("_");
-        }
-        Console.WriteLine("\n");
+        await File.WriteAllLinesAsync($"{path}\\note.txt", taskList);
+        Console.WriteLine("Сохранено!");
     }
+}
+
+//Чтение файла
+void ReadProgram()
+{
+    for (int i = 0; i < taskList.Length; i++)
+        taskList = File.ReadAllLines($"{path}\\note.txt");
+}
+
+//Вывод полученного списка задач
+void ShowList(string[] Array)
+{
+    for (int j = 0; j < 10; j++)
+    {
+        Console.Write("_");
+    }
+    Console.WriteLine();
+
+    for (int i = 0; i < taskList.Length; i++)
+        Console.WriteLine($"{i + 1}. {taskList[i]}");
+
+    for (int j = 0; j < 10; j++)
+    {
+        Console.Write("_");
+    }
+    Console.WriteLine("\n");
 }
